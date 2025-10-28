@@ -27,7 +27,8 @@ router.post('/register', async (req, res) => {
     // get random profile image
 
     const profileImage = `https://api.dicebear.com/7.x/avataaars/png?seed=${name}`;
-    const newUser = await User.create({ name, email, password ,profileImage});
+const newUser = new User({ name, email, password, profileImage });
+await newUser.save();
     const token = await generateToken(newUser._id);
     res.json({ success: true, message: "User created successfully", data: { user: newUser, token } });
 });
