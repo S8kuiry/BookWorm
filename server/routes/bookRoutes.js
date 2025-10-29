@@ -22,7 +22,7 @@ bookRouter.post("/add", protect, upload.single("image"), async (req, res) => {
 
     // ✅ Upload image to ImageKit
     const uploadResponse = await imagekit.upload({
-      file: image.buffer, // from multer memoryStorage
+      file: image.buffer,
       fileName: image.originalname,
       folder: "book_images",
       transformation: [{ width: 300, height: 300, quality: 75 }],
@@ -44,10 +44,11 @@ bookRouter.post("/add", protect, upload.single("image"), async (req, res) => {
       message: "Book added successfully!",
     });
   } catch (error) {
-    console.error("Error adding book:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Failed to add book." });
+    console.error("🔥 Error adding book:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to add book.",
+    });
   }
 });
 
