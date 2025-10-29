@@ -51,25 +51,19 @@ bookRouter.post("/add", protect, upload.single("image"), async (req, res) => {
 ================================ */
 bookRouter.get("/all", protect, async (req, res) => {
   try {
-  
-   
-
-    const [books, totalBooks] = await Promise.all([
-      Book.find()
-       
-        .populate("user", "name profileImage"),
-      Book.countDocuments(),
-    ]);
+    // ✅ Fetch all books and populate user details
+    const books = await Book.find()
+      .sort({ createdAt: -1 })
+      .populate("user", "name profileImage");
 
     return res.json({
       success: true,
       books,
-      currentPage: page,
-      totalBooks,
-      totalPages: Math.ceil(totalBooks / limit),
+      totalBooks: books.length,
+      message: "Books fetched successfully",
     });
   } catch (error) {
-    console.error("Error fetching books:", error);
+    console.error("🔥 Error fetching books:", error);
     return res
       .status(500)
       .json({ success: false, message: "Failed to fetch books." });
