@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import { connectDB } from './configs/db.js';
 import authRoutes from './routes/authRoutes.js';
 import bookRouter from './routes/bookRoutes.js';
+import path from 'path'
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT ;  
@@ -16,6 +17,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(express.json());
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
 
 // db connection
 connectDB()

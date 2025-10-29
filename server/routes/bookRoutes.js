@@ -1,21 +1,14 @@
 import express from "express";
-import mongoose from "mongoose";
+import fs from "fs";
+import path from "path";
 import Book from "../models/Book.js";
 import upload from "../configs/multer.js";
 import { protect } from "../middleware/auth.js";
 
 const bookRouter = express.Router();
 
-// Setup GridFS bucket
-let gfs;
-mongoose.connection.once("open", () => {
-  gfs = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
-    bucketName: "uploads",
-  });
-});
-
 /* ================================
-   📘 Add New Book (with GridFS)
+   📘 Add New Book (Local Upload)
 ================================ */
 bookRouter.post("/add", protect, upload.single("image"), async (req, res) => {
   try {
@@ -30,13 +23,11 @@ bookRouter.post("/add", protect, upload.single("image"), async (req, res) => {
       });
     }
 
-    // ✅ File is already uploaded to MongoDB via GridFS
-    // multer-gridfs-storage handled that
+    // ✅ Save book with image path (stored in /uploads)
     const newBook = await Book.create({
       title,
       caption,
-      image: `/api/books/file/${image.filename}`, // store accessible file route
-      imageId: image.id, // store GridFS file ID
+      image: `/uploads/${image.filename}`, // public path
       rating,
       user: userId,
     });
@@ -52,22 +43,6 @@ bookRouter.post("/add", protect, upload.single("image"), async (req, res) => {
       success: false,
       message: error.message || "Failed to add book.",
     });
-  }
-});
-
-/* ================================
-   🖼️ Serve Stored Image
-================================ */
-bookRouter.get("/file/:filename", async (req, res) => {
-  try {
-    const file = await gfs.find({ filename: req.params.filename }).toArray();
-    if (!file || file.length === 0)
-      return res.status(404).json({ message: "File not found" });
-
-    gfs.openDownloadStreamByName(req.params.filename).pipe(res);
-  } catch (error) {
-    console.error("Error retrieving file:", error);
-    res.status(500).json({ message: "Error retrieving file" });
   }
 });
 
@@ -105,7 +80,7 @@ bookRouter.get("/", protect, async (req, res) => {
 });
 
 /* ================================
-   ❌ Delete Book (with GridFS)
+   ❌ Delete Book (and Local Image)
 ================================ */
 bookRouter.delete("/:id", protect, async (req, res) => {
   try {
@@ -116,17 +91,17 @@ bookRouter.delete("/:id", protect, async (req, res) => {
       return res.status(404).json({ success: false, message: "Book not found" });
 
     if (book.user.toString() !== req.userId)
-      return res
-        .status(403)
-        .json({ success: false, message: "Not authorized to delete this book" });
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to delete this book",
+      });
 
-    // ✅ Delete file from GridFS
-    if (book.imageId) {
-      try {
-        await gfs.delete(new mongoose.Types.ObjectId(book.imageId));
-      } catch (error) {
-        console.warn("⚠️ GridFS deletion failed:", error.message);
-      }
+    // ✅ Delete image from /uploads folder
+    if (book.image) {
+      const imagePath = path.join(process.cwd(), book.image);
+      fs.unlink(imagePath, (err) => {
+        if (err) console.warn("⚠️ Failed to delete image:", err.message);
+      });
     }
 
     await Book.findByIdAndDelete(id);
@@ -144,4 +119,3 @@ bookRouter.delete("/:id", protect, async (req, res) => {
 });
 
 export default bookRouter;
-
