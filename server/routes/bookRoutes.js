@@ -49,17 +49,14 @@ bookRouter.post("/add", protect, upload.single("image"), async (req, res) => {
 /* ================================
    📚 Fetch Books (Paginated)
 ================================ */
-bookRouter.get("/", protect, async (req, res) => {
+bookRouter.get("/all", protect, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
-    const skip = (page - 1) * limit;
+  
+   
 
     const [books, totalBooks] = await Promise.all([
       Book.find()
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
+       
         .populate("user", "name profileImage"),
       Book.countDocuments(),
     ]);
