@@ -49,7 +49,7 @@ bookRouter.post("/add", protect, upload.single("image"), async (req, res) => {
 /* ================================
    📚 Fetch Books (Paginated)
 ================================ */
-bookRouter.get("/all", protect, async (req, res) => {
+bookRouter.get("/all", async (req, res) => {
   try {
     // ✅ Fetch all books and populate user details
     const books = await Book.find()
