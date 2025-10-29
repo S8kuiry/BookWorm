@@ -1,13 +1,14 @@
 import express from "express";
-import fs from "fs";
-import imagekit from "../configs/imagekit.js";
 import Book from "../models/Book.js";
 import upload from "../configs/multer.js";
 import { protect } from "../middleware/auth.js";
+import imagekit from "../configs/imagekit.js";
 
 const bookRouter = express.Router();
 
-// ✅ Add new book
+/* ================================
+   📘 Add New Book
+================================ */
 bookRouter.post("/add", protect, upload.single("image"), async (req, res) => {
   try {
     const userId = req.userId;
@@ -20,15 +21,15 @@ bookRouter.post("/add", protect, upload.single("image"), async (req, res) => {
         .json({ success: false, message: "Please provide all required fields." });
     }
 
-    // ✅ Upload image to ImageKit
-    const uploadResponse = await imagekit.upload({
-      file: image.buffer,
+    // ✅ Upload image to ImageKit (new SDK syntax)
+    const uploadResponse = await imagekit.assets.upload({
+      file: image.buffer, // file buffer from multer
       fileName: image.originalname,
       folder: "book_images",
       transformation: [{ width: 300, height: 300, quality: 75 }],
     });
 
-    // ✅ Create new book
+    // ✅ Create book record in MongoDB
     const newBook = await Book.create({
       title,
       caption,
@@ -52,7 +53,9 @@ bookRouter.post("/add", protect, upload.single("image"), async (req, res) => {
   }
 });
 
-// ✅ Fetch all books (paginated)
+/* ================================
+   📚 Fetch Books (Paginated)
+================================ */
 bookRouter.get("/", protect, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -83,7 +86,9 @@ bookRouter.get("/", protect, async (req, res) => {
   }
 });
 
-// ✅ Delete book
+/* ================================
+   ❌ Delete Book
+================================ */
 bookRouter.delete("/:id", protect, async (req, res) => {
   try {
     const { id } = req.params;
@@ -101,16 +106,16 @@ bookRouter.delete("/:id", protect, async (req, res) => {
         .json({ success: false, message: "Not authorized to delete this book" });
     }
 
-    // ✅ Delete image from ImageKit
+    // ✅ Delete image from ImageKit (new SDK syntax)
     if (book.imageId) {
       try {
-        await imagekit.deleteFile(book.imageId);
+        await imagekit.assets.deleteFile(book.imageId);
       } catch (error) {
-        console.warn("ImageKit deletion failed:", error.message);
+        console.warn("⚠️ ImageKit deletion failed:", error.message);
       }
     }
 
-    // ✅ Delete book from DB
+    // ✅ Delete book from MongoDB
     await Book.findByIdAndDelete(id);
 
     return res.json({
