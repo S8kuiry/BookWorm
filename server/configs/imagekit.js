@@ -1,5 +1,6 @@
-import { ImageKit } from "@imagekit/nodejs"; // <-- FIXED import
+import ImageKit from "@imagekit/nodejs"; // ✅ no curly braces
 import dotenv from "dotenv";
+
 dotenv.config();
 
 const imagekit = new ImageKit({
@@ -9,4 +10,3 @@ const imagekit = new ImageKit({
 });
 
 export default imagekit;
- 
