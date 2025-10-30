@@ -3,8 +3,11 @@ import React from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import COLORS from '../constants/colors';
+import { useContext } from 'react';
+import { AppContext } from '../context/AppContext';
 
 const BookCard = ({ book }) => {
+  const {backendUrl} = useContext(AppContext)
   return (
     <LinearGradient
       colors={['#fff', '#fdf4f5']}
@@ -60,7 +63,7 @@ const BookCard = ({ book }) => {
 
         {/* --- Book Image --- */}
         <Image
-          source={{ uri: book.image }}
+          source={{ uri: backendUrl+book.image }}
           style={{
             width: '100%',
             height: 200,

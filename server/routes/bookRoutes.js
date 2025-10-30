@@ -70,6 +70,8 @@ bookRouter.get("/all", async (req, res) => {
   }
 });
 
+
+
 /* ================================
    ❌ Delete Book (and Local Image)
 ================================ */
@@ -110,3 +112,16 @@ bookRouter.delete("/:id", protect, async (req, res) => {
 });
 
 export default bookRouter;
+
+// fetch books by user id ----
+bookRouter.get('/all/:id',protect,async(req,res)=>{
+  try {
+    const userId = req.userId;
+    const books = await Book.find({user:userId}).sort({ createdAt: -1 })
+     
+    return res.json({success:true,books})
+    
+  } catch (error) {
+     console.error("Error deleting book:", error);
+  }
+})

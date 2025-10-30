@@ -9,6 +9,7 @@ export const AppProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [books,setBooks] = useState(null)
 
   // ✅ Load token & user from AsyncStorage on app start
   useEffect(() => {
@@ -91,12 +92,10 @@ export const AppProvider = ({ children }) => {
   };
 const handleFetchData = async () => {
   try {
-    const { data } = await axios.get(`${backendUrl}/api/book`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const { data } = await axios.get(`${backendUrl}/api/books/all`, {
+    
     });
-    console.log("📚 Books fetched:", data.books);
+    setBooks(data.books)
   } catch (error) {
     console.log("❌ Fetch failed:", error.response?.data || error.message);
   }
@@ -106,7 +105,7 @@ const handleFetchData = async () => {
 
   useEffect(()=>{
     handleFetchData()
-  },[token])
+  },[])
 
   const value = {
     backendUrl,
@@ -117,6 +116,7 @@ const handleFetchData = async () => {
     isLoading,
     fetchUser,
     logout,
+    books,setBooks
   };
 
   // Simple fallback during restore

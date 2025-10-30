@@ -2,9 +2,13 @@ import { View, Text, ScrollView, Image, FlatList } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import BookCard from '../../components/BookCard'
+import { useContext } from 'react'
+import { AppContext } from "../../context/AppContext";
+
 
 
 const index = () => {
+    const {books} = useContext(AppContext)
 
     const data = [
         {
@@ -127,7 +131,7 @@ const index = () => {
 
                {/**------------------ bbook card section ------------------ */}
                <View className="w-full h-24"></View>
-               {data.map((book, index) => (
+               {books.map((book, index) => (
                 <BookCard key={index} book={book} />
                ))}
 
