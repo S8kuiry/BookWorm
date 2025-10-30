@@ -14,35 +14,22 @@ bookRouter.post("/add", protect, upload.single("image"), async (req, res) => {
   try {
     const userId = req.userId;
     const { title, caption, rating } = req.body;
-    const image = req.file;
 
-    if (!title || !caption || !image || !rating) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide all required fields.",
-      });
-    }
+    if (!req.file?.path)
+      return res.status(400).json({ success: false, message: "Image upload failed" });
 
-    // ✅ Save book with image path (stored in /uploads)
     const newBook = await Book.create({
       title,
       caption,
-      image: `/uploads/${image.filename}`, // public path
+      image: req.file.path, // Cloudinary auto-provides URL here!
       rating,
       user: userId,
     });
 
-    return res.json({
-      success: true,
-      book: newBook,
-      message: "Book added successfully!",
-    });
-  } catch (error) {
-    console.error("🔥 Error adding book:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to add book.",
-    });
+    res.json({ success: true, book: newBook });
+  } catch (err) {
+    console.error("Error adding book:", err);
+    res.status(500).json({ success: false, message: "Failed to add book." });
   }
 });
 

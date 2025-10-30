@@ -15,11 +15,31 @@ import Reccomedation from "../../components/Reccomedation";
 import { AppContext } from "../../context/AppContext";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 const Profile = () => {
-  const { user, isLoading, setToken, setUser } = useContext(AppContext);
+  const { user, isLoading, setToken, setUser,backendUrl ,token} = useContext(AppContext);
   const navigate = useRouter();
+    const [data, setData] = useState( []);
 
+
+
+  const fetchUserBooks = async()=>{
+    try {
+      const {data} = await axios.get(backendUrl+"/api/books/user/all",{
+        headers:{
+          Authorization:`Bearer ${token}`
+        }
+      })
+      setData(data.books)
+      
+      
+    } catch (error) {
+      Alert.alert(error.message)
+      
+      console.log(error.message)
+    }
+  }
   const bookData = [
      {
             "title": "The Silent Forest",
@@ -102,8 +122,9 @@ const Profile = () => {
             "user": "64f8b5a2d3f1c2b7e1a1c010"
         }
   ];
-
-  const [data, setData] = useState(bookData || []);
+useEffect(()=>{
+  fetchUserBooks()
+},[])
   const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {

@@ -2,21 +2,32 @@ import { View, Text, Image, TouchableOpacity } from 'react-native';
 import React from 'react';
 import COLORS from '../constants/colors';
 import { FontAwesome } from '@expo/vector-icons';
+import { useContext } from 'react';
+import { AppContext } from '../context/AppContext';
 
 const Reccomedation = ({ item, allData = [], setData }) => {
-  const handleDelete = () => {
-    if (!item?.imageId) {
-      console.warn('Missing imageId for item:', item);
+  const {backendUrl,token} = useContext(AppContext)
+  const handleDelete = async(id) => {
+    try {
+      if (!token) {
+      console.warn("No token found");
       return;
     }
 
-    if (!Array.isArray(allData)) {
-      console.warn('Expected array for allData, got:', allData);
-      return;
-    }
+    const res = await axios.delete(`${backendUrl}/api/books/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // ✅ Required for protected route
+      },
+    });
 
-    const filtered = allData.filter(itm => itm?.imageId !== item.imageId);
-    setData(filtered);
+    if (res.data.success) {
+      // ✅ Remove deleted book from local list
+      setData(allData.filter((book) => book._id !== id));
+    }
+  } catch (error) {
+    console.error("❌ Delete error:", error.response?.data || error.message);
+  }
+    
   };
 
   if (!item) {
@@ -48,7 +59,7 @@ const Reccomedation = ({ item, allData = [], setData }) => {
       {item.image ? (
         <Image
           style={{ height: 100, width: 80, borderRadius: 10 }}
-          source={{ uri: item.image }}
+          source={{ uri: backendUrl+item.image }}
         />
       ) : (
         <View
@@ -111,7 +122,7 @@ const Reccomedation = ({ item, allData = [], setData }) => {
       </View>
 
       {/* --- Delete Icon --- */}
-      <TouchableOpacity onPress={handleDelete}>
+      <TouchableOpacity onPress={()=>handleDelete(item._id)}>
         <FontAwesome name="trash" size={17} color="gray" />
       </TouchableOpacity>
     </View>
