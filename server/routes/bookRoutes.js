@@ -113,15 +113,22 @@ bookRouter.delete("/:id", protect, async (req, res) => {
 
 export default bookRouter;
 
-// fetch books by user id ----
-bookRouter.get('/all/:id',protect,async(req,res)=>{
+// Fetch books of logged-in user
+bookRouter.get("/user/all", protect, async (req, res) => {
   try {
     const userId = req.userId;
-    const books = await Book.find({user:userId}).sort({ createdAt: -1 })
-     
-    return res.json({success:true,books})
-    
+    const books = await Book.find({ user: userId }).sort({ createdAt: -1 });
+
+    return res.json({
+      success: true,
+      books,
+      totalBooks: books.length,
+      message: "User books fetched successfully",
+    });
   } catch (error) {
-     console.error("Error deleting book:", error);
+    console.error("🔥 Error fetching user books:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch user books." });
   }
-})
+});
