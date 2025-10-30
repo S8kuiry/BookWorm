@@ -6,7 +6,7 @@
 markdown
 # 📚 BookWorm — Mobile App
 
-### Live Ap
+### Live App
 👉 [Open on Expo](https://expo.dev/preview/update?message=Initial+public+release&updateRuntimeVersion=1.0.0&createdAt=2025-10-30T07%3A51%3A43.632Z&slug=exp&projectId=c3f9ea10-79dc-4d09-bf0b-3c9fcd9d2bda&group=a2e8b885-f127-4294-9649-762515d61b17)
 
 ---
